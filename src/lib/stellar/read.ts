@@ -5,7 +5,7 @@ import { createConfig } from "../config";
 
 export interface OnChainStream {
   sender: string; recipient: string; token: string;
-  deposited: bigint; withdrawn: bigint; startTime: bigint; endTime: bigint;
+  deposited: bigint; withdrawn: bigint; vested: bigint; withdrawable: bigint; startTime: bigint; endTime: bigint;
   cliffTime: bigint; status: string;
 }
 
@@ -59,17 +59,26 @@ export async function getOnChainStream(
   const passphrase = config.network === "PUBLIC" ? Networks.PUBLIC : Networks.TESTNET;
   const account = await server.getAccount(sourceAddress);
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-  const operation = new Contract(config.streamContractId).call(
-    "get_stream", xdr.ScVal.scvU64(xdr.Uint64.fromString(streamId)),
-  );
+  const contract = new Contract(config.streamContractId);
+  const encodedId = xdr.ScVal.scvU64(xdr.Uint64.fromString(streamId));
   const transaction = new TransactionBuilder(account, { fee: "100", networkPassphrase: passphrase })
-    .addOperation(operation).setTimeout(30).build();
+    .addOperation(contract.call("get_stream", encodedId))
+    .addOperation(contract.call("vested_of", encodedId))
+    .addOperation(contract.call("withdrawable_of", encodedId))
+    .setTimeout(30).build();
   const simulation = await server.simulateTransaction(transaction);
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
   if (!SorobanRpc.Api.isSimulationSuccess(simulation)) {
     throw new Error(simulation.error || "Soroban stream lookup failed.");
   }
-  const encoded = simulation.results?.[0]?.xdr;
-  if (!encoded) throw new Error("Soroban returned no stream data.");
-  return decodeStream(scValToNative(xdr.ScVal.fromXDR(encoded, "base64")));
+  const results = simulation.results ?? [];
+  if (!results[0]?.xdr || !results[1]?.xdr || !results[2]?.xdr) {
+    throw new Error("Soroban returned incomplete stream data.");
+  }
+  const stream = decodeStream(scValToNative(xdr.ScVal.fromXDR(results[0].xdr, "base64")));
+  return {
+    ...stream,
+    vested: toBigInt(scValToNative(xdr.ScVal.fromXDR(results[1].xdr, "base64")), "vested amount"),
+    withdrawable: toBigInt(scValToNative(xdr.ScVal.fromXDR(results[2].xdr, "base64")), "withdrawable amount"),
+  };
 }
