@@ -18,7 +18,12 @@ export function useStreamVerification(stream: StreamRecord | null | undefined): 
       return () => controller.abort();
     }
     setVerification({ status: "verifying", mismatches: [], message: "Checking the stream against Soroban…" });
-    getOnChainStream(numericId, stream.treasuryAddress, controller.signal)
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const lookup = getOnChainStream(numericId, stream.treasuryAddress, controller.signal);
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error("Soroban verification timed out.")), 12_000);
+    });
+    Promise.race([lookup, timeout])
       .then((onChain) => {
         if (controller.signal.aborted) return;
         const mismatches = compareStreamWithOnChain(stream, onChain);
