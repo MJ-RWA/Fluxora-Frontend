@@ -23,6 +23,9 @@ describe("compareStreamWithOnChain", () => {
     const result = compareStreamWithOnChain(displayed, { ...onChain, deposited: 10_000_000n, recipient: "GCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", status: "Paused" });
     expect(result.map((item) => item.field)).toEqual(["Recipient", "Deposit", "Status"]);
   });
+  it("flags amounts with more than seven decimal places instead of rounding", () => {
+    expect(compareStreamWithOnChain({ ...displayed, depositAmount: 1.00000001 }, onChain).map((item) => item.field)).toContain("Deposit");
+  });
   it("maps depleted contract streams to completed", () => {
     expect(compareStreamWithOnChain(displayed, { ...onChain, status: "Depleted" })).toEqual([]);
   });
