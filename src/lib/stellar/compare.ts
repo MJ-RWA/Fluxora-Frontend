@@ -29,6 +29,19 @@ export function compareStreamWithOnChain(displayed: StreamRecord, onChain: OnCha
   if (deposit === null || deposit !== onChain.deposited) {
     mismatches.push({ field: "Deposit", displayed: displayed.depositAmount + " " + displayed.asset, onChain: onChain.deposited.toString() });
   }
+  const streamed = toStroops(displayed.streamedAmount);
+  if (streamed === null || streamed !== onChain.vested) {
+    mismatches.push({ field: "Streamed", displayed: displayed.streamedAmount + " " + displayed.asset, onChain: onChain.vested.toString() });
+  }
+  const withdrawable = toStroops(displayed.withdrawableAmount);
+  if (withdrawable === null || withdrawable !== onChain.withdrawable) {
+    mismatches.push({ field: "Withdrawable", displayed: displayed.withdrawableAmount + " " + displayed.asset, onChain: onChain.withdrawable.toString() });
+  }
+  const remaining = toStroops(displayed.remainingAmount);
+  const onChainRemaining = onChain.deposited - onChain.vested;
+  if (remaining === null || remaining !== onChainRemaining) {
+    mismatches.push({ field: "Remaining", displayed: displayed.remainingAmount + " " + displayed.asset, onChain: onChainRemaining.toString() });
+  }
   const start = dateToSeconds(displayed.startDate);
   if (start === null || start !== onChain.startTime) {
     mismatches.push({ field: "Start time", displayed: displayed.startDate, onChain: onChain.startTime.toString() });
