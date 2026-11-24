@@ -139,6 +139,7 @@ export default function StreamDetail() {
 
   const [topUpAmount, setTopUpAmount] = useState("");
   const [topUpStatus, setTopUpStatus] = useState<TransactionStatus>("idle");
+  const verification = useStreamVerification(stream);
 
   // Tracks the cancel function of whichever fetch (initial load or a
   // manual retry) is currently in flight, so a newer fetch can cancel a
@@ -418,7 +419,6 @@ export default function StreamDetail() {
   };
 
   const statusPresentation = getStreamStatusPresentation(stream.status);
-  const verification = useStreamVerification(stream);
 
   // ── Single-stream detail ──────────────────────────────────────────────────
   return (
