@@ -15,6 +15,7 @@ import { PresenceBadge, PresenceCursorOverlay } from "../components/presence";
 import { useWallet } from "../components/wallet-connect/Walletcontext";
 import { StreamOGPreviewModal } from "../components/StreamOGPreviewModal";
 import { Share2 } from "lucide-react";
+import { useStreamVerification } from "../lib/stellar/useStreamVerification";
 
 /**
  * Stream status presentation
@@ -417,6 +418,7 @@ export default function StreamDetail() {
   };
 
   const statusPresentation = getStreamStatusPresentation(stream.status);
+  const verification = useStreamVerification(stream);
 
   // ── Single-stream detail ──────────────────────────────────────────────────
   return (
@@ -509,6 +511,32 @@ export default function StreamDetail() {
           {stream.health} — {stream.healthNote}
         </span>
       </div>
+
+      <section
+        aria-label="On-chain stream verification"
+        data-testid="stream-verification"
+        data-verification-status={verification.status}
+        role={verification.status === "mismatch" ? "alert" : "status"}
+        aria-live="polite"
+        style={{ marginBottom: "1.5rem", padding: "0.875rem 1rem", borderRadius: "8px", border: "1px solid var(--color-border, #e5e7eb)", background: "var(--color-surface-1, #fff)" }}
+      >
+        <strong>
+          {verification.status === "verified" && "✓ Verified on-chain"}
+          {verification.status === "mismatch" && "⚠ On-chain mismatch"}
+          {verification.status === "verifying" && "Verifying on-chain…"}
+          {verification.status === "unavailable" && "On-chain verification unavailable"}
+        </strong>
+        <p style={{ margin: "0.375rem 0 0", fontSize: "0.875rem" }}>{verification.message}</p>
+        {verification.mismatches.length > 0 && (
+          <ul style={{ margin: "0.5rem 0 0", paddingLeft: "1.25rem" }}>
+            {verification.mismatches.map((mismatch) => (
+              <li key={mismatch.field}>
+                <strong>{mismatch.field}:</strong> displayed {mismatch.displayed}; on-chain {mismatch.onChain}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {/* Top-Up Flow */}
       <div style={{ marginBottom: "1.5rem", padding: "1rem", background: "var(--color-surface-2, #f3f4f6)", borderRadius: "8px" }}>
