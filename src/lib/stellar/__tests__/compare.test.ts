@@ -14,14 +14,14 @@ const displayed = {
 const onChain = {
   sender: displayed.treasuryAddress, recipient: displayed.recipientAddress,
   token: "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
-  deposited: 10_000_001n, withdrawn: 0n, startTime: 1_767_225_600n,
+  deposited: 10_000_001n, withdrawn: 0n, vested: 0n, withdrawable: 0n, startTime: 1_767_225_600n,
   endTime: 1_769_904_000n, cliffTime: 1_767_225_600n, status: "Active",
 } satisfies OnChainStream;
 describe("compareStreamWithOnChain", () => {
   it("compares amounts in bigint stroops", () => { expect(compareStreamWithOnChain(displayed, onChain)).toEqual([]); });
   it("reports differing fields", () => {
     const result = compareStreamWithOnChain(displayed, { ...onChain, deposited: 10_000_000n, recipient: "GCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", status: "Paused" });
-    expect(result.map((item) => item.field)).toEqual(["Recipient", "Deposit", "Status"]);
+    expect(result.map((item) => item.field)).toEqual(["Recipient", "Deposit", "Remaining", "Status"]);
   });
   it("flags amounts with more than seven decimal places instead of rounding", () => {
     expect(compareStreamWithOnChain({ ...displayed, depositAmount: 1.00000001 }, onChain).map((item) => item.field)).toContain("Deposit");
