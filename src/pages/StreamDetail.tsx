@@ -531,7 +531,7 @@ export default function StreamDetail() {
           <ul style={{ margin: "0.5rem 0 0", paddingLeft: "1.25rem" }}>
             {verification.mismatches.map((mismatch) => (
               <li key={mismatch.field}>
-                <strong>{mismatch.field}:</strong> displayed {mismatch.displayed}; on-chain {mismatch.onChain}
+                <strong>{mismatch.field}:</strong> displayed {mismatch.displayed.length > 18 ? mismatch.displayed.slice(0, 8) + "…" + mismatch.displayed.slice(-6) : mismatch.displayed}; on-chain {mismatch.onChain.length > 18 ? mismatch.onChain.slice(0, 8) + "…" + mismatch.onChain.slice(-6) : mismatch.onChain}
               </li>
             ))}
           </ul>
