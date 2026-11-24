@@ -60,3 +60,22 @@ Cancels an active or paused stream, returning unaccrued funds to the sender.
 | -------------- | ----------- | ---------- | --------------- | ----------------------------------------------------- |
 | 1              | `sender`    | `Address`  | `encodeAddress` | The Stellar address of the stream owner.              |
 | 2              | `stream_id` | `u64`      | `encodeU64`     | The numerical ID of the stream.                       |
+
+
+---
+
+### get_stream (read-only)
+
+Reads the complete stream record by its numeric contract stream ID. The frontend
+uses Soroban RPC simulateTransaction with this getter; it does not request
+wallet authorization, sign, or submit a transaction.
+
+| Argument | ScVal type | Description |
+| --- | --- | --- |
+| stream_id | u64 | Numeric stream identifier |
+
+The returned Stream includes sender, recipient, token, deposited and withdrawn
+(i128 stroops), start_time, end_time and cliff_time (u64 Unix seconds), and
+status. The detail page compares the sender, recipient, deposited amount,
+schedule and status with the API record. The API asset ticker is not a token
+contract address and is not compared directly.
