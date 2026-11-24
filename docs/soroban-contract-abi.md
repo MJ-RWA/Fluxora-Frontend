@@ -76,6 +76,8 @@ wallet authorization, sign, or submit a transaction.
 
 The returned Stream includes sender, recipient, token, deposited and withdrawn
 (i128 stroops), start_time, end_time and cliff_time (u64 Unix seconds), and
-status. The detail page compares the sender, recipient, deposited amount,
-schedule and status with the API record. The API asset ticker is not a token
-contract address and is not compared directly.
+status. The detail page also simulates vested_of(stream_id) and
+withdrawable_of(stream_id), both returning i128 stroops. It compares the sender,
+recipient, deposited, vested, withdrawable and remaining amounts, schedule and
+status with the API record. The API asset ticker is not a token contract address
+and is not compared directly.
